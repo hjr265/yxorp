@@ -1,0 +1,9 @@
+[core]
+addr = ":8080"
+base = "http://hjr265.github.io/yxorp"
+
+	[core.http.transport.tls]
+	insecure = false
+
+[mond]
+addr = "127.0.0.1:5050"
