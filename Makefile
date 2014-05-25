@@ -5,6 +5,6 @@ all: yxorp
 clean:
 	rm -f yxorp
 
-yxorp: config.go main.go config-sample.tml mond/bootstrap.css mond/bootstrap.js mond/index.html mond/jquery.js
+yxorp: config.go main.go config-sample.tml mond/bootstrap.css mond/bootstrap.js mond/credits.json mond/index.html mond/jquery.js
 	go build
 	zrsc-embed $@ config-sample.tml mond
