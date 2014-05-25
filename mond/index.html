@@ -5,10 +5,23 @@
 		<title>Yxorp mond</title>
 
 		<link rel="stylesheet" href="/bootstrap.css">
+		<style type="text/css">
+			html,
+			body {
+				height: 100%;
+			}
+
+			#wrapper {
+				min-height: 100%;
+				height: auto;
+				margin-bottom: -32px;
+				padding-bottom: 40px;
+			}
+		</style>
 	</head>
 
-	<body>
-		<div class="container">
+	<body class="container">
+		<div id="wrapper">
 			<header class="row">
 				<div class="col-md-12">
 					<div class="page-header">
@@ -23,36 +36,155 @@
 			</div>
 		</div>
 
+		<footer class="row">
+			<div class="col-md-4 col-md-offset-8 text-right">
+				<p class="small"><a href="#about" data-toggle="modal" data-target="#about">About</a></p>
+			</div>
+		</footer>
+
+		<div id="about" class="modal fade">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title">Yxorp <small>v0.2</small></h4>
+					</div>
+					<div class="modal-body">
+						<div class="row">
+							<div class="col-md-12">
+								<p>
+									Reverse proxy, booyah!<br>
+									<a href="https://github.com/hjr265/yxorp" target="_blank">https://github.com/hjr265/yxorp</a>
+								</p>
+								<br>
+								<br>
+								<br>
+								<br>
+								<p class="small">
+									Copyright 2014 The Yxorp Authors. All rights reserved.<br>
+									Built using magic and <a href="#credits" data-toggle="modal" data-target="#credits">open source software</a>.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="credits" class="modal fade">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times</button>
+						<h4 class="modal-title">Credits</h4>
+					</div>
+					<div class="modal-body">
+						<div class="panel-group"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script src="jquery.js"></script>
+		<script src="bootstrap.js"></script>
 		<script type="text/javascript">
-			'use strict'
+			(function() {
+				'use strict'
 
-			var socket = null
-			function connect() {
-				socket = new WebSocket('ws://' + location.host + '/hub')
+				var socket = null
+				function connect() {
+					socket = new WebSocket('ws://' + location.host + '/hub')
 
-				socket.onmessage = function(event) {
-					var pre = document.getElementsByTagName('pre')[0]
-					  , p = document.createElement('p')
-					  , data = JSON.parse(event.data)
-					switch(data[0]) {
-					case 'HELO':
-						break
+					socket.onmessage = function(event) {
+						var pre = document.getElementsByTagName('pre')[0]
+						  , p = document.createElement('p')
+						  , data = JSON.parse(event.data)
+						switch(data[0]) {
+						case 'HELO':
+							break
 
-					case 'SRVD':
-						p.textContent = data[1]
-						pre.insertBefore(p,	pre.firstChild)
-						break
+						case 'SRVD':
+							p.textContent = data[1]
+							pre.insertBefore(p,	pre.firstChild)
+							break
+						}
+					}
+
+					socket.onclose = function() {
+						setTimeout(function() {
+							connect()
+						}, 1000)
 					}
 				}
 
-				socket.onclose = function() {
-					setTimeout(function() {
-						connect()
-					}, 1000)
-				}
-			}
+				connect()
 
-			connect()
+				$.getJSON('/credits.json')
+				.success(function(credits) {
+					$.each(credits, function(i, credit) {
+						$('#credits .panel-group').append($('<div></div>')
+							.append($('<div class="panel panel-default"></div>')
+								.append($('<div class="panel-heading"></div>')
+									.append($('<h4 class="panel-title"></h4>')
+										.append($('<a data-toggle="collapse" data-parent="#credits"></a>')
+											.attr('href', '#credits-' + credit.name
+												.toLowerCase()
+												.replace(/[^a-z0-9]+/g, '')
+											)
+											.text(credit.name)
+										)
+									)
+								)
+								.append($('<div class="panel-collapse collapse"></div>')
+									.attr('id', 'credits-' + credit.name
+										.toLowerCase()
+										.replace(/[^a-z0-9]+/g, '')
+									)
+									.append($('<div class="panel-body"></div>')
+										.append($('<p></p>')
+											.text(credit.description)
+											.append($('<small> &mdash; </small>')
+												.append($('<a target="_blank"></a>')
+													.attr('href', credit.homepage)
+													.text(credit.homepage
+														.replace(/^http:\/\//, '')
+														.replace(/\/$/, '')
+													)
+												)
+											)
+										)
+										.append($('<p></p>')
+											.append($('<a href="#">License</a>')
+												.attr('href', '#credits-' + i)
+												.attr('data-toggle', 'modal')
+												.attr('data-target', '#credits-' + i)
+											)
+										)
+									)
+								)
+							).children()
+						)
+
+						$('body').append($('<div id="credits-' + i + '" class="modal fade"></div>')
+							.append($('<div class="modal-dialog modal-lg"></div>')
+								.append($('<div class="modal-content">')
+									.append($('<div class="modal-header">')
+										.append($('<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times</button>'))
+										.append($('<h4 class="modal-title"></h4>')
+											.text(credit.name + ' / License')
+										)
+									)
+									.append($('<div class="modal-body">')
+										.append($('<pre class="pre-scrollable">')
+											.text(credit.license)
+										)
+									)
+								)
+							)
+						)
+					})
+				})
+			})()
 		</script>
 	</body>
 </html>
