@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -39,7 +40,8 @@ func main() {
 		s := http.Server{
 			Addr: addr,
 			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				hub.Send([]interface{}{"SRVD", fmt.Sprintf("%s", r.URL.String())})
+				host, _, _ := net.SplitHostPort(r.RemoteAddr)
+				hub.Send([]interface{}{"SRVD", fmt.Sprintf("%s - %s %s", host, r.Method, r.URL.String())})
 
 				proxy.ServeHTTP(w, r)
 			}),
